@@ -1,0 +1,666 @@
+import { CodeSurfer, CodeSurferColumns, Step } from "code-surfer"
+import { nightOwl } from "@code-surfer/themes"
+
+
+export const theme = nightOwl
+
+
+<CodeSurferColumns>
+
+<Step>
+<div>
+
+  # React Redux Middleware
+
+  <center> by Hun </center>
+
+</div>
+</Step>
+
+<Step title="Middleware">
+<div>
+
+### Action --> Middleware --> Reducer --> Store
+
+### A function that returns a function, which also returns a function.
+
+- Log the action on console.
+- Cancel/Dispatch other actions based on provided action.
+- Manage async operations. e.g. Data fetch or network request.
+
+
+</div>
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<CodeSurfer >
+
+```js title="Middleware - Structure and Flow"
+const loggerMiddleware = store => next => action => {
+    // Code here.
+};
+
+const loggerMiddleware = function loggerMiddleware(store) {
+    return function(next) {
+        return function(action) {
+            // Code here.
+        };
+    };
+};
+
+// Action --> Middleware1 --> Next
+// --> Middleware2 --> Next --> Reducer --> Store
+```
+
+```diff 13,14  subtitle="Flow"
+```
+
+```diff 1[43:48],7  subtitle="Redux action which is dispatched"
+```
+
+```diff 1[35:38],6  subtitle="next(action) to send the action to next Middleware or Reducer."
+```
+
+```diff 1[26:30],5  subtitle="Redux store"
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```js title="lib/loggerMiddleware"
+const loggerMiddleware = store => next => action => {
+    console.group(action && action.type); // 액션 타입으로 log 를 그룹화함
+    console.log('이전 상태', store.getState());
+    console.log('액션', action);
+    next(action); // 다음 미들웨어 혹은 리듀서에게 전달
+    console.log('다음 상태', store.getState()); // 업데이트 된 상태
+    console.groupEnd(); // 그룹 끝
+};
+
+export default loggerMiddleware;
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```js title="index.js - custom-logger"
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import './index.css';
+import App from './App';
+import rootReducer from './modules';
+import loggerMiddleware from './lib/loggerMiddleware';
+
+
+const store = createStore(rootReducer, applyMiddleware(loggerMiddleware));
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+);
+```
+
+```js title="index.js - redux-logger"
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import './index.css';
+import App from './App';
+import rootReducer from './modules';
+// import loggerMiddleware from './lib/loggerMiddleware';
+import { createLogger } from 'redux-logger'
+
+const logger = createLogger();
+const store = createStore(rootReducer, applyMiddleware(logger));
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+);
+```
+
+</CodeSurfer>
+
+---
+
+# Demo - logger
+
+---
+
+<CodeSurferColumns>
+
+<Step title="Definitions">
+<div>
+
+  - Higher-order function: 
+    - a function that does at least one of the following
+    - takes one or more functions as arguments (i.e. procedural parameters),
+    - returns a function as its result.
+
+  - Closure(a.k.a. lexical closure or function closure)
+    - Techniqe for implementing lexically scoped name binding.
+
+  - Thunk
+    - Subroutine used to inject an additional calculation into another subroutine.
+    - Early limited type of closure.
+
+</div>
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<CodeSurfer>
+
+```python 1:4 title="Example - closure"
+def f(x):
+  def g(y):
+      return x + y
+  return g  # Return a closure.
+
+# Assigning specific closures to variables.
+a = f(1)
+
+# Using the closures stored in variables.
+assert a(5) == 6
+
+# Using closures without binding them to variables first.
+assert f(1)(5) == 6  # f(1) is the closure.
+```
+
+```diff 1:10 title="Thunk"
+```
+
+```diff 1:4,12:13  title="Thunk"
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurferColumns>
+
+<Step title="Middleware for async operations">
+
+<div>
+
+### redux-thunk:
+  
+  - Dispatch actions in function form.
+
+### redux-saga:
+  
+  - Set of rules to dispatch actions when an action is dispatched.
+
+</div>
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<CodeSurfer>
+
+```js 1,2 title="Thunk"
+const addOne = x => x + 1;
+addOne(1) // 2
+
+function addOne(x) {
+  const thunk = () => addOne(x);
+  return thunk;
+}
+
+const fn = addOneThunk(1);
+setTimeout(() => {
+  const value = fn();
+  console.log(value); // 2
+}, 1000);
+```
+
+```diff 1,4:7 title="Thunk"
+```
+
+```diff 1,4:13 title="Thunk"
+```
+
+```js title="Thunk"
+const addOne = x => x + 1;
+
+function addOne(x) = () => addOne(x);
+
+const fn = addOneThunk(1);
+setTimeout(() => {
+  const value = fn();
+  console.log(value); // 2
+}, 1000);
+```
+
+```js title="redux-thunk example"
+const sampleThunk = () => (dispatch, getState) => {
+  // Access to current status.
+  // Able to dispatch new actions.
+}
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurfer>
+
+```js title="Thunk-Counter-index.js"
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import './index.css';
+import App from './App';
+import rootReducer from './modules';
+// import loggerMiddleware from './lib/loggerMiddleware';
+import { createLogger } from 'redux-logger'
+
+const logger = createLogger();
+const store = createStore(rootReducer, applyMiddleware(logger));
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+);
+```
+
+```title="Thunk-Counter-index.js"
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import './index.css';
+import App from './App';
+import rootReducer from './modules';
+// import loggerMiddleware from './lib/loggerMiddleware';
+import { createLogger } from 'redux-logger'
+import ReduxThunk from 'redux-thunk';
+
+const logger = createLogger();
+const store = createStore(rootReducer, applyMiddleware(logger, ReduxThunk));
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+);
+```
+
+```js title="Thunk-Counter-modules/counter.js"
+import { createAction, handleActions } from 'redux-actions';
+
+
+const INCREASE = 'counter/INCREASE';
+const DECREASE = 'counter/DECREASE';
+
+export const increase = createAction(INCREASE);
+export const decrease = createAction(DECREASE);
+
+const initialState = 0; // 상태는 꼭 객체일 필요 없습니다. 숫자도 작동해요.
+
+const counter = handleActions(
+  {
+    [INCREASE]: state => state + 1,
+    [DECREASE]: state => state - 1
+  },
+  initialState
+);
+
+export default counter;
+
+```
+
+```title="Thunk-Counter-modules/counter.js"
+import { createAction, handleActions } from 'redux-actions';
+
+
+const INCREASE = 'counter/INCREASE';
+const DECREASE = 'counter/DECREASE';
+
+export const increase = createAction(INCREASE);
+export const decrease = createAction(DECREASE);
+
+export const increaseAsync = () => dispatch => {
+  setTimeout(() => {
+    dispatch(increase());
+  }, 1000);
+};
+export const decreaseAsync = () => dispatch => {
+  setTimeout(() => {
+    dispatch(decrease());
+  }, 1000);
+};
+
+const initialState = 0; // 상태는 꼭 객체일 필요 없습니다. 숫자도 작동해요.
+
+const counter = handleActions(
+  {
+    [INCREASE]: state => state + 1,
+    [DECREASE]: state => state - 1
+  },
+  initialState
+);
+
+export default counter;
+```
+
+```js title="Thunk-Counter-container/CounterContainer.js"
+import React from 'react';
+import { connect } from 'react-redux';
+import { increase, decrease } from '../modules/counter';
+import Counter from '../components/Counter';
+
+const CounterContainer = ({ number, increase, decrease }) => {
+  return (
+    <Counter
+      number={number}
+      onIncrease={increase}
+      onDecrease={decrease}
+    />
+  );
+};
+
+export default connect(
+  state => ({
+    number: state.counter
+  }),
+  {
+    increase,
+    decrease
+  }
+)(CounterContainer);
+```
+
+```title="Thunk-Counter-container/CounterContainer.js"
+import React from 'react';
+import { connect } from 'react-redux';
+import { increaseAsync, decreaseAsync } from '../modules/counter';
+import Counter from '../components/Counter';
+
+const CounterContainer = ({ number, increaseAsync, decreaseAsync }) => {
+  return (
+    <Counter
+      number={number}
+      onIncrease={increaseAsync}
+      onDecrease={decreaseAsync}
+    />
+  );
+};
+
+export default connect(
+  state => ({
+    number: state.counter
+  }),
+  {
+    increaseAsync,
+    decreaseAsync
+  }
+)(CounterContainer);
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurferColumns>
+
+<Step title="Thunk-Sample-Demo1" subtitle="Initial implementation">
+
+<div>
+
+### Code change:
+
+  - M  package.json
+  - M  src/App.js
+  - A  src/components/Sample.js
+  - A  src/containers/SampleContainer.js
+  - A  src/lib/api.js
+  - M  src/modules/index.js
+  - A  src/modules/sample.js
+
+</div>
+</Step>
+
+<Step title="Thunk-Sample-Demo2" subtitle="Refactor: createRequestThrunk">
+
+<div>
+
+### Code change:
+
+  - M  src/modules/sample.js
+  - A  src/lib/createRequestThunk.js
+
+</div>
+</Step>
+
+<Step title="Thunk-Sample-Demo3" subtitle="Refactor: loading">
+
+<div>
+
+### Code change:
+
+  - M  src/containers/SampleContainer.js
+  - M  src/lib/createRequestThunk.js
+  - M  src/modules/index.js
+  - A  src/modules/loading.js
+  - M  src/modules/sample.js
+
+</div>
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<CodeSurferColumns>
+
+<Step title="Redux-saga">
+
+<div>
+
+### Better then redux-thunk in cases:
+
+  - Cancel current request(Prevent duplicated request).
+  - Action triggers another action or API calls.
+  - Web socket.
+  - Re-reqeust when API call is failed.
+
+### Generator function:
+  - Generators are functions that can be exited and later re-entered.
+  - Their context (variable bindings) will be saved across re-entrances.
+
+</div>
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<CodeSurfer>
+
+```js title="Generator-How?"
+function weridFunction() {
+  return 1;
+  return 2;
+  return 3;
+};
+```
+
+</CodeSurfer>
+
+---
+
+<CodeSurferColumns>
+
+<Step>
+
+```js title="Generator-Example1"
+function* generatorFunction() {
+  console.log('Hello');
+  yield 1;
+  console.log('Generator function');
+  yield 2;
+  console.log('function*');
+  yield 3;
+  return 4;
+};
+
+const generator = generatorFunction();
+```
+
+```js
+generator.next();
+// Hello
+// { value: 1, done: false }
+generator.next();
+// Generator function
+// { value: 2, done: false }
+generator.next();
+// function*
+// { value: 3, done: false }
+generator.next();
+// { value: 4, done: true }
+generator.next();
+// { value: undefined, done: true }
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<CodeSurferColumns>
+
+<Step>
+
+```js title="Generator-Example2"
+function* sumGenerator() {
+  console.log('sumGenerator is created');
+  let a = yield;
+  let b = yield;
+  yield a + b;
+};
+
+const sum = sumGenerator();
+```
+
+```js
+sum.next();
+// sumGenerator is created
+// { value: undefined, done: false }
+sum.next(1);
+// { value: undefined, done: false }
+sum.next(2);
+// { value: 3, done: false }
+sum.next();
+// { value: undefined, done: true }
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<CodeSurferColumns>
+
+<Step title="Saga-Counter-Demo1" subtitle="Change to saga">
+
+<div>
+
+### Code change:
+
+  - M  package.json
+  - M  src/App.js
+  - M  src/index.js
+  - M  src/modules/counter.js
+  - M  src/modules/index.js
+
+</div>
+</Step>
+
+<Step title="Saga-Counter-Demo2" subtitle="Use dev tool">
+
+<div>
+
+### Code change:
+
+  - M  package.json
+  - M  src/index.js
+
+</div>
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+<CodeSurferColumns>
+
+<Step title="Saga-Sample-Demo1" subtitle="Change to saga">
+
+<div>
+
+### Code change:
+
+  - M  src/App.js
+  - M  src/modules/index.js
+  - M  src/modules/sample.js
+
+</div>
+</Step>
+
+<Step title="Saga-Sample-Demo2" subtitle="createRequestSaga">
+
+<div>
+
+### Code change:
+
+  - A  src/lib/createRequestSaga.js
+  - M  src/modules/sample.js
+
+</div>
+</Step>
+
+<Step title="Saga-tips">
+
+<div>
+
+### Code change:
+
+  - M src/App.js
+  - M src/modules/counter.js
+
+</div>
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+# The End.
