@@ -6,6 +6,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 > * The official github repo for the book is [here](https://github.com/velopert/learning-react).
 > * To use this code in any project, you should contact its author.
 
+## Presentation
+
+Presentation of this chapter/code is [here](https://github.com/heons/learn-redux-middleware/tree/master/deck).
+
 ## Available Scripts
 
 In the project directory, you can run:
