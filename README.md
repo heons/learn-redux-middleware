@@ -1,6 +1,10 @@
-# Getting Started with Create React App
+# Project Description
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+> * This is the part of study in book, [리엑트를 다루는 기술](https://thebook.io/080203/). 
+> * The official github repo for the book is [here](https://github.com/velopert/learning-react).
+> * To use this code in any project, you should contact its author.
 
 ## Available Scripts
 
